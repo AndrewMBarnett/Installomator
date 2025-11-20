@@ -41,16 +41,13 @@ while read -r line; do
         infoOut "Found label: $label_name"
         in_label=1
     fi
-    
     # Capture the entire label block
     if [[ $in_label -eq 1 ]]; then
         current_label+=$'\n'$line
     fi
-    
     # Detect the end of the label
     if [[ $in_label -eq 1 && "$line" =~ $endlabel_re ]]; then
         label_file="$label_dir/${label_name}.sh"
-        
         # Check if label file exists and compare content
         if [[ -f "$label_file" ]]; then
             if ! diff -q <(echo "$current_label") "$label_file" > /dev/null; then
@@ -63,21 +60,20 @@ while read -r line; do
             infoOut "Creating new label file: $label_file"
             echo "$current_label" > "$label_file"
         fi
-        
         in_label=0
         current_label=""
-        
         # Update labels.txt if the label is missing
         if ! grep -q "^${label_name}$" "$labels_file"; then
             infoOut "Adding label $label_name to Labels.txt"
             echo "$label_name" >> "$labels_file"
-            cp -p "$labels_file" "$labels_file.tmp"
-            sort -o "$labels_file.tmp" "$labels_file.tmp"
-            mv "$labels_file.tmp" "$labels_file"
         fi
     fi
-    
 done < "$installomatorScript"
+
+# Sort Labels.txt alphabetically
+infoOut "Sorting Labels.txt"
+sort -o "$labels_file" "$labels_file"
+chmod a+r "$labels_file"
 
 infoOut "Extraction complete"
 exit 0

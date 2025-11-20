@@ -11,4 +11,13 @@ androidstudio)
 	fi
     expectedTeamID="EQHXZ8M8AV"
     blockingProcesses=( androidstudio )
+
+    appCustomVersion() {
+        customVersionFile="/Users/Shared/.AndroidStudioInstalledVersion"
+        if [ -f "${customVersionFile}" ]; then
+            result=$(cat "${customVersionFile}")
+        fi
+        echo $appNewVersion > "${customVersionFile}"
+        echo $result
+    }
     ;;

@@ -6,11 +6,16 @@ downloadURL="https://links.extensis.com/connect_fonts/cf_latest?language=en&plat
 appNewVersion=$( curl -is "$downloadURL" | grep "location:" | grep -o "[[:digit:]]\+-[[:digit:]]\+-[[:digit:]]\+" | sed -e 's/-/./g' )
 expectedTeamID="J6MMHGD9D6"
 ;;
-cormorant)
-    # credit: Søren Theilgaard (@theilgaard)
-    name="Cormorant"
-    type="zip"
-    downloadURL=$(curl -fs https://eclecticlight.co/downloads/ | grep -i $name | grep zip | sed -E 's/.*href=\"(https.*)\">.*/\1/g')
-    appNewVersion=$(curl -fs https://eclecticlight.co/downloads/ | grep zip | grep -o -E "$name [0-9.]*" | awk '{print $2}')
-    expectedTeamID="QWY4LRW926"
+container)
+    name="container"
+    type="pkg"
+    archiveName="container-[0-9.]*-installer-signed"
+    downloadURL="$(downloadURLFromGit apple container)"
+    appNewVersion="$(versionFromGit apple container)"
+    appCustomVersion(){
+        if [ -f /usr/local/bin/container ];then
+            /usr/local/bin/container --version | awk '{print $3}'
+        fi
+    }
+    expectedTeamID="UPBK2H6LZM"
     ;;
