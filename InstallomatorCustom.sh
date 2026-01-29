@@ -350,8 +350,8 @@ if [[ $(/usr/bin/arch) == "arm64" ]]; then
     fi
 fi
 
-VERSION="12.73"
-VERSIONDATE="2025-11-20"
+VERSION="12.74"
+VERSIONDATE="2026-01-29"
 
 # MARK: Functions
 
@@ -1841,6 +1841,13 @@ adobereaderdc-update)
     blockingProcesses=( "Acrobat Pro DC" "AdobeAcrobat" "AdobeReader" "Distiller" )
     Company="Adobe"
     ;;
+affinityapp)
+    name="Affinity"
+    type="dmg"
+    appName="Affinity.app"
+    downloadURL="https://downloads.affinity.studio/Affinity.dmg"
+    expectedTeamID="5HD2ARTBFS"
+    ;;
 affinitydesigner2)
     name="Affinity Designer 2"
     type="dmg"
@@ -1881,8 +1888,14 @@ aircall)
 airflow)
     name="Air"
     type="dmg"
-    downloadURL="$(downloadURLFromGit AirLabsTeam desktop-releases)"
-    appNewVersion="$(versionFromGit AirLabsTeam desktop-releases)"
+    if [[ $(arch) == "arm64" ]]; then
+        archiveName="Air-arm64.dmg"
+
+    elif [[ $(arch) == "i386" ]]; then
+        archiveName="Air-x64.dmg"
+    fi
+    downloadURL="$(downloadURLFromGit AirLabsTeam airflow-releases)"
+    appNewVersion="$(versionFromGit AirLabsTeam airflow-releases)"
     expectedTeamID="8RBYE8TY7T"
     ;;
 airserver)
@@ -2293,6 +2306,28 @@ sfsymbols)
     fi
     appNewVersion=$ver
     expectedTeamID="Software Update"
+    ;;
+appsanywhere)
+    name="AppsAnywhere Client (macOS)"
+    type="pkg"
+    aaClientReleasePage="https://docs.appsanywhere.com/appsanywhere/3.2/appsanywhere-client-macos"
+    latestVersion="$(
+      /usr/bin/curl -fsSL "$aaClientReleasePage" \
+      | /usr/bin/sed -nE 's/.*id="AppsAnywhereClient\(macOS\)-Version([0-9]+\.[0-9]+\.[0-9]+)\(CurrentVersion\)".*/\1/p' \
+      | /usr/bin/head -n 1
+    )"
+    if [[ -z "$latestVersion" ]]; then
+        printlog "ERROR: Could not determine latest AppsAnywhere macOS client version from $aaClientReleasePage"
+        cleanupAndExit 99
+    fi
+    downloadURL="https://files.appsanywhere.com/clients/appsanywhere/mac/${latestVersion}/apps-anywhere-setup-InstitutionId-${latestVersion}.pkg"
+    pkgName="apps-anywhere-setup-InstitutionId-${latestVersion}.pkg"
+    expectedTeamID="9ZNX23CMVD"
+    appCustomVersion(){
+        /usr/bin/defaults read "/Applications/AppsAnywhere/AppsAnywhere.app/Contents/Info" CFBundleShortVersionString 2>/dev/null || echo "0"
+    }
+    appNewVersion="$latestVersion"
+    updateTool="/Applications/AppsAnywhere/AppsAnywhere Updater.app/Contents/MacOS/AppsAnywhere Updater"
     ;;
     aquamacs)
     name="Aquamacs"
@@ -4033,7 +4068,7 @@ diskspace)
     ;;
 displaylinkmanager)
     name="DisplayLink Manager"
-    type="pkgInZip"
+    type="pkg"
     #packageID="com.displaylink.displaylinkmanagerapp"
     downloadURL=https://www.synaptics.com$(redirect=$(curl -sfL https://www.synaptics.com/products/displaylink-graphics/downloads/macos | grep -m 1 'class="download-link">Download' | sed 's/.*href="//' | sed 's/".*//') && curl -sfL "https://www.synaptics.com$redirect" | grep 'class="no-link"' | awk -F 'href="' '{print $2}' | awk -F '"' '{print $1}')
     appNewVersion=$(curl -sfL https://www.synaptics.com/products/displaylink-graphics/downloads/macos | grep -m 1 "Release:" | cut -d ' ' -f2)
@@ -5011,7 +5046,7 @@ fsmonitor)
 fujifilmwebcam)
      name="FUJIFILM X Webcam 2"
      type="pkg"
-     downloadURL=$(curl -fs "https://fujifilm-x.com/en-us/support/download/software/x-webcam/" | grep "https.*pkg" | sed -E 's/.*(https:\/\/dl.fujifilm-x\.com\/support\/software\/.*\.pkg[^\<]).*/\1/g' | sed -e 's/^"//' -e 's/"$//')
+    downloadURL=$(curl -fsL "https://www.fujifilm-x.com/en-us/support/download/software/x-webcam/" | grep "https.*pkg" | sed -E 's/.*(https:\/\/dl.fujifilm-x\.com\/support\/software\/.*\.pkg[^\<]).*/\1/g' | sed -e 's/^"//' -e 's/"$//')
      appNewVersion=$( echo “${downloadURL}” | sed -E 's/.*XWebcamIns([0-9]*).*/\1/g' | sed -E 's/([0-9])([0-9]).*/\1\.\2/g')
      expectedTeamID="34LRP8AV2M"
      ;;
@@ -6867,6 +6902,12 @@ macports)
     type="pkg"
     #buildVersion=$(uname -r | cut -d '.' -f 1)
     case $(uname -r | cut -d '.' -f 1) in
+        25)
+            archiveName="Tahoe.pkg"
+            ;;
+	    24)
+	        archiveName="Sequoia.pkg"
+	        ;;
         23)
             archiveName="Sonoma.pkg"
             ;;
@@ -6883,12 +6924,12 @@ macports)
             archiveName="Catalina.pkg"
             ;;
         *)
-            cleanupAndExit 98 "macOS 10.14 or earlier not supported by Installomator."
+            cleanupAndExit 98 "Mac Ports label does not support this version of darwin."
             ;;
     esac
     downloadURL=$(downloadURLFromGit macports macports-base)
     appNewVersion=$(versionFromGit macports macports-base)
-    appCustomVersion(){ if [ -x /opt/local/bin/port ]; then /opt/local/bin/port version | awk '{print $2}'; else "0"; fi }
+    appCustomVersion(){ if [ -x /opt/local/bin/port ]; then /opt/local/bin/port version | awk '{print $2}'; fi }
     updateTool="/opt/local/bin/port"
     updateToolArguments="selfupdate"
     expectedTeamID="QTA3A3B7F3"
@@ -8039,39 +8080,38 @@ nweasecuretestingbrowser)
 
 obs)
     name="OBS"
+    appName="OBS.app"
     type="dmg"
     if [[ $(arch) == "arm64" ]]; then
         SUFeedURL="https://obsproject.com/osx_update/updates_arm64_v2.xml"
+        archiveName="OBS-Studio-[0-9.]*-macOS-Apple.dmg"
     elif [[ $(arch) == "i386" ]]; then
         SUFeedURL="https://obsproject.com/osx_update/updates_x86_64_v2.xml"
+        archiveName="OBS-Studio-[0-9.]*-macOS-Intel.dmg"
     fi
     appNewVersion=$(curl -fs "$SUFeedURL" | xpath '(//rss/channel/item[sparkle:channel="stable"]/sparkle:shortVersionString/text())[1]' 2>/dev/null)
     downloadURL=$(curl -fs "$SUFeedURL" | xpath 'string(//rss/channel/item[sparkle:channel="stable"]/enclosure/@url[1])' 2>/dev/null)
     archiveName=$(basename "$downloadURL")   
     versionKey="CFBundleShortVersionString"
     blockingProcesses=( "OBS Studio" )
+    downloadURL=$(downloadURLFromGit obsproject obs-studio )
+    appNewVersion=$(versionFromGit obsproject obs-studio )
     expectedTeamID="2MMRE5MTB8"
     ;;
 obsbotcenter|\
 obsbotwebcam)
-name="OBSBOT_Center"
-type="dmg"
-
-# Extract downloadURL
-downloadURL=$(curl -fsL "https://www.obsbot.com/download/obsbot-tiny-series" | grep -o 'url_mac:"https:\\u002F\\u002F[^"]*' | head -n 1 | sed -E 's/url_mac:"https:\\u002F\\u002F(.*)/https:\/\/\1/' | sed 's/\\u002F/\//g')
-
-# Extract appNewVersion
-appNewVersion=$(curl -fsL "https://www.obsbot.com/download/obsbot-tiny-series" | xmllint --html --xpath 'string(//div[contains(@class,"pl-title")][contains(text(),"macOS")])' - 2>/dev/null | sed -E 's/.*macOS v([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-
-# If appNewVersion is not found, extract it from the download URL as a fallback
-if [[ -z "$appNewVersion" ]]; then
-  appNewVersion=$(echo "$downloadURL" | sed -E 's/.*_MacOS_([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)_release.*/\1/')
-fi
-
-# Add the version to the download URL
-downloadURL="${downloadURL//_MacOS_[^_]*_release/_MacOS_${appNewVersion}_release}"
-
-expectedTeamID="7GJANK3822"
+    name="OBSBOT_Center"
+    type="dmg"
+    
+    # Let the browser handle the download page with JavaScript
+    if [[ $(arch) == "arm64" ]]; then
+        downloadURL="https://www.obsbot.com/download/obsbot-center-mac-apple"
+    else
+        downloadURL="https://www.obsbot.com/download/obsbot-center-mac-intel"
+    fi
+    
+    appNewVersion="2.0.13.64"
+    expectedTeamID="7GJANK3822"
     ;;
 obsidian)
     # credit: Søren Theilgaard (@theilgaard)
@@ -9402,8 +9442,8 @@ shotcut)
 shottr)
     name="Shottr"
     type="dmg"
-    downloadURL="https://shottr.cc$(curl -fs "https://shottr.cc/newversion.html" | grep -o '\/dl\/Shottr-[0-9].[0-9].[0-9]\.dmg' | head -1 | xargs)"
-    appNewVersion=$(echo $downloadURL | grep -o '[0-9].[0-9].[0-9]' | xargs)
+    downloadURL="https://shottr.cc$(curl -fs "https://shottr.cc/newversion.html" | grep -o '\/dl\/Shottr-[0-9.]*\.dmg' | head -1 | xargs)"
+    appNewVersion=$(echo $downloadURL | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1 | xargs)
     expectedTeamID="2Y683PRQWN"
     ;;
 sidekick)
@@ -10949,7 +10989,7 @@ venturablocker)
     appNewVersion=$(versionFromGit Theile venturablocker )
     expectedTeamID="FXW6QXBFW5"
     ;;
-veracrypt)
+veracrypt-fuse-t)
     name="VeraCrypt"
     type="pkgInDmg"
     archiveName="VeraCrypt_FUSE-T_[0-9.].*\.dmg"
@@ -11326,9 +11366,9 @@ wireshark)
     name="Wireshark"
     type="dmg"
     if [[ $(arch) == i386 ]]; then
-      sparkleFeedURL="https://www.wireshark.org/update/0/Wireshark/4.0.0/macOS/x86-64/en-US/stable.xml"
+      sparkleFeedURL="https://www.wireshark.org/update/0/Wireshark/4.6.3/macOS/x86-64/en-US/stable.xml"
     elif [[ $(arch) == arm64 ]]; then
-      sparkleFeedURL="https://www.wireshark.org/update/0/Wireshark/4.0.0/macOS/arm64/en-US/stable.xml"
+      sparkleFeedURL="https://www.wireshark.org/update/0/Wireshark/4.6.3/macOS/arm64/en-US/stable.xml"
     fi
     sparkleFeed=$(curl -fs "$sparkleFeedURL")
     appNewVersion=$(echo "$sparkleFeed" | xpath '(//rss/channel/item/enclosure/@sparkle:version)[1]' 2>/dev/null | cut -d '"' -f 2)
