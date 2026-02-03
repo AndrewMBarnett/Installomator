@@ -337,7 +337,6 @@ fellow
 fierycommandworkstation
 figma
 filemakerpro
-filezilla
 filmlab
 finalcutprocontent
 finaldraft11
