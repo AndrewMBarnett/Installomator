@@ -1,6 +1,6 @@
 
 taskpaper)
-    # credit: Drew Diver (@grumpydrew on MacAdmins Slack)
+    # credit: Drew Diver (@grumpydrew on MacAdmins Slack )
     name="TaskPaper"
     type="dmg"
     downloadURL="https://www.taskpaper.com/assets/app/TaskPaper.dmg"

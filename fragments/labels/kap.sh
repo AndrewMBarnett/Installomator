@@ -1,6 +1,6 @@
 
 kap)
-    # credit: Lance Stephens (@pythoninthegrass on MacAdmins Slack)
+    # credit: Lance Stephens (@pythoninthegrass on MacAdmins Slack )
     name="Kap"
     type="dmg"
     if [[ $(arch) = "i386" ]]; then

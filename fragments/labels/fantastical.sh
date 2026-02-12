@@ -1,6 +1,6 @@
 
 fantastical)
-    # credit: Drew Diver (@grumpydrew on MacAdmins Slack)
+    # credit: Drew Diver (@grumpydrew on MacAdmins Slack )
     name="Fantastical"
     type="zip"
     downloadURL="https://flexibits.com/fantastical/download"

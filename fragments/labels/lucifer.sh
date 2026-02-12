@@ -1,6 +1,6 @@
 
 lucifer)
-    # credit: Drew Diver (@grumpydrew on MacAdmins Slack)
+    # credit: Drew Diver (@grumpydrew on MacAdmins Slack )
     name="Lucifer"
     type="zip"
     downloadURL="https://www.hexedbits.com/downloads/lucifer.zip"

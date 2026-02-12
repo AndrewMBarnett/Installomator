@@ -1,6 +1,6 @@
 
 calibre)
-    # credit: Drew Diver (@grumpydrew on MacAdmins Slack)
+    # credit: Drew Diver (@grumpydrew on MacAdmins Slack )
     name="calibre"
     type="dmg"
     downloadURL="https://calibre-ebook.com/dist/osx"

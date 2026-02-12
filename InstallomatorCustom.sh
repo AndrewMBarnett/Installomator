@@ -350,8 +350,8 @@ if [[ $(/usr/bin/arch) == "arm64" ]]; then
     fi
 fi
 
-VERSION="12.75"
-VERSIONDATE="2026-02-03"
+VERSION="12.76"
+VERSIONDATE="2026-02-12"
 
 # MARK: Functions
 
@@ -2958,7 +2958,7 @@ calcservice)
     expectedTeamID="679S2QUWR8"
     ;;
 calibre)
-    # credit: Drew Diver (@grumpydrew on MacAdmins Slack)
+    # credit: Drew Diver (@grumpydrew on MacAdmins Slack )
     name="calibre"
     type="dmg"
     downloadURL="https://calibre-ebook.com/dist/osx"
@@ -3557,6 +3557,15 @@ cinema4d2026)
     CLIInstaller="Maxon Cinema 4D Installer.app/Contents/MacOS/installbuilder.sh"
     CLIArguments=(--mode unattended --unattendedmodeui none)
     expectedTeamID="4ZY22YGXQG"
+    ;;
+ciscojabber)
+    name="ciscojabber"
+    type="pkg"
+    htmlContent=$(curl -fsL "https://www.webex.com/downloads/jabber.html")
+    downloadURL=$(echo "$htmlContent" | sed -n "s/.*jabberAppUrl = '\([^']*Install_Cisco-Jabber-Mac\.pkg\)'.*/\1/p")
+    appNewVersion=$(echo "$htmlContent" | grep -o "Download for macOS [0-9.]*" | grep -o "[0-9.]*$")
+    expectedTeamID="DE8Y96K9QP"
+    appName="Cisco Jabber.app"
     ;;
 cisdem-documentreader)
     name="cisdem-documentreader"
@@ -4585,7 +4594,7 @@ evernote)
     name="Evernote"
     type="dmg"
     downloadURL="https://mac.desktop.evernote.com/builds/Evernote-latest.dmg"
-    appNewVersion=$(curl -s https://evernote.com/release-notes | grep Latest | awk -F '<!-- -->' '{print $2}')
+    appNewVersion=$(curl -fs https://evernote.com/release-notes | sed -En 's/.*Version ([0-9.]+) - Latest.*/\1/p')
     expectedTeamID="Q79WDW8YH9"
     ;;
 everweb)
@@ -4647,7 +4656,7 @@ facebookmessenger)
     expectedTeamID="V9WTTPBFK9"
     ;;
 fantastical)
-    # credit: Drew Diver (@grumpydrew on MacAdmins Slack)
+    # credit: Drew Diver (@grumpydrew on MacAdmins Slack )
     name="Fantastical"
     type="zip"
     downloadURL="https://flexibits.com/fantastical/download"
@@ -6258,7 +6267,7 @@ jupyterlab)
     expectedTeamID="2YJ64GUAVW"
     ;;
 kap)
-    # credit: Lance Stephens (@pythoninthegrass on MacAdmins Slack)
+    # credit: Lance Stephens (@pythoninthegrass on MacAdmins Slack )
     name="Kap"
     type="dmg"
     if [[ $(arch) = "i386" ]]; then
@@ -6819,7 +6828,7 @@ lucidlink)
     expectedTeamID="Y4KMJPU2B4"
     ;;
 lucifer)
-    # credit: Drew Diver (@grumpydrew on MacAdmins Slack)
+    # credit: Drew Diver (@grumpydrew on MacAdmins Slack )
     name="Lucifer"
     type="zip"
     downloadURL="https://www.hexedbits.com/downloads/lucifer.zip"
@@ -8083,17 +8092,10 @@ obs)
     appName="OBS.app"
     type="dmg"
     if [[ $(arch) == "arm64" ]]; then
-        SUFeedURL="https://obsproject.com/osx_update/updates_arm64_v2.xml"
         archiveName="OBS-Studio-[0-9.]*-macOS-Apple.dmg"
     elif [[ $(arch) == "i386" ]]; then
-        SUFeedURL="https://obsproject.com/osx_update/updates_x86_64_v2.xml"
         archiveName="OBS-Studio-[0-9.]*-macOS-Intel.dmg"
     fi
-    appNewVersion=$(curl -fs "$SUFeedURL" | xpath '(//rss/channel/item[sparkle:channel="stable"]/sparkle:shortVersionString/text())[1]' 2>/dev/null)
-    downloadURL=$(curl -fs "$SUFeedURL" | xpath 'string(//rss/channel/item[sparkle:channel="stable"]/enclosure/@url[1])' 2>/dev/null)
-    archiveName=$(basename "$downloadURL")   
-    versionKey="CFBundleShortVersionString"
-    blockingProcesses=( "OBS Studio" )
     downloadURL=$(downloadURLFromGit obsproject obs-studio )
     appNewVersion=$(versionFromGit obsproject obs-studio )
     expectedTeamID="2MMRE5MTB8"
@@ -8743,7 +8745,7 @@ processing4)
     appCustomVersion(){ echo "$(defaults read /Applications/Processing.app/Contents/Info.plist CFBundleVersion )$( defaults read /Applications/Processing.app/Contents/Info.plist CFBundleShortVersionString )" }
     ;;
 proctortrack)
-    #credit: Jeff F. (@jefff on MacAdmins Slack)
+    #credit: Jeff F. (@jefff on MacAdmins Slack )
     name="Proctortrack"
     type="zip"
     downloadURL="https://storage.googleapis.com/verificientstatic/ProctortrackApp/Production/Proctortrack.zip"
@@ -10343,7 +10345,7 @@ talkdeskcxcloud)
     expectedTeamID="YGGJX44TB8"
     ;;
 taskpaper)
-    # credit: Drew Diver (@grumpydrew on MacAdmins Slack)
+    # credit: Drew Diver (@grumpydrew on MacAdmins Slack )
     name="TaskPaper"
     type="dmg"
     downloadURL="https://www.taskpaper.com/assets/app/TaskPaper.dmg"
